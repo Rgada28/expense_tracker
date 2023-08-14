@@ -1,16 +1,16 @@
+import 'package:expense_tracker/provider/expenses_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/models/expense.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NewExpense extends StatefulWidget {
-  const NewExpense(this.addExpense, {super.key});
-
-  final void Function(Expense expense) addExpense;
+class NewExpense extends ConsumerStatefulWidget {
+  const NewExpense({super.key});
 
   @override
-  State<NewExpense> createState() => _NewExpenseState();
+  ConsumerState<NewExpense> createState() => _NewExpenseState();
 }
 
-class _NewExpenseState extends State<NewExpense> {
+class _NewExpenseState extends ConsumerState<NewExpense> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   DateTime? _selectedDate;
@@ -51,11 +51,12 @@ class _NewExpenseState extends State<NewExpense> {
           });
       return;
     }
-    widget.addExpense(Expense(
+    ref.watch(expensesProvider.notifier).addExpense(Expense(
         title: _titleController.text.trim(),
         amount: enteredAmount,
         date: _selectedDate!,
         category: _selectedCategory));
+
     Navigator.pop(context);
   }
 

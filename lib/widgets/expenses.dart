@@ -1,67 +1,25 @@
-import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/provider/expenses_provider.dart';
 import 'package:expense_tracker/widgets/chart/chart.dart';
 import 'package:expense_tracker/widgets/new_expense.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'expenses_list/expense_list.dart';
 
-class Expenses extends StatefulWidget {
+class Expenses extends ConsumerWidget {
   const Expenses({super.key});
 
-  @override
-  State<Expenses> createState() => _ExpensesState();
-}
-
-class _ExpensesState extends State<Expenses> {
-  final List<Expense> _registeredExpenses = [
-    Expense(
-        title: "Cab",
-        amount: 9.99,
-        date: DateTime.now(),
-        category: Category.travel),
-    Expense(
-        title: "Movie",
-        amount: 15.49,
-        date: DateTime.now(),
-        category: Category.leisure)
-  ];
-
-  void addExpense(Expense expense) {
-    setState(() {
-      _registeredExpenses.add(expense);
-    });
-  }
-
-  void removeExpense(Expense expense) {
-    final index = _registeredExpenses.indexOf(expense);
-    setState(() {
-      _registeredExpenses.remove(expense);
-    });
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      duration: const Duration(seconds: 3),
-      content: const Text("Expense Deleted."),
-      action: SnackBarAction(
-          label: "undo",
-          onPressed: () {
-            setState(() {
-              _registeredExpenses.insert(index, expense);
-            });
-          }),
-    ));
-  }
-
-  void _openAddExpenseOverlay() {
+  void _openAddExpenseOverlay(context) {
     showModalBottomSheet(
         useSafeArea: true,
         isScrollControlled: true,
         context: context,
         builder: (ctx) {
-          return NewExpense(addExpense);
+          return const NewExpense();
         });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final width = MediaQuery.of(context).size.width;
     Widget mainContent = const Center(
       child: Text("No expenses found. Start adding some!"),
@@ -71,7 +29,7 @@ class _ExpensesState extends State<Expenses> {
         title: const Text("Flutter ExpenseTracker"),
         actions: [
           IconButton(
-            onPressed: _openAddExpenseOverlay,
+            onPressed: () => _openAddExpenseOverlay(context),
             icon: const Icon(Icons.add),
           )
         ],
@@ -79,26 +37,24 @@ class _ExpensesState extends State<Expenses> {
       body: width < 600
           ? Column(
               children: [
-                Chart(expenses: _registeredExpenses),
+                Chart(expenses: ref.watch(expensesProvider)),
                 Expanded(
-                  child: _registeredExpenses.isEmpty
+                  child: ref.watch(expensesProvider).isEmpty
                       ? mainContent
                       : ExpenseList(
-                          expenses: _registeredExpenses,
-                          onRemoveExpense: removeExpense,
+                          expenses: ref.watch(expensesProvider),
                         ),
                 ),
               ],
             )
           : Row(
               children: [
-                Expanded(child: Chart(expenses: _registeredExpenses)),
+                Expanded(child: Chart(expenses: ref.watch(expensesProvider))),
                 Expanded(
-                  child: _registeredExpenses.isEmpty
+                  child: ref.watch(expensesProvider).isEmpty
                       ? mainContent
                       : ExpenseList(
-                          expenses: _registeredExpenses,
-                          onRemoveExpense: removeExpense,
+                          expenses: ref.watch(expensesProvider),
                         ),
                 ),
               ],
