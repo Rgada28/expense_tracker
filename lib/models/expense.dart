@@ -8,6 +8,13 @@ const uuid = Uuid();
 
 enum Category { food, travel, leisure, work }
 
+const String expenseTable = 'expenses';
+const String columnId = 'id';
+const String columnTitle = 'title';
+const String columnAmount = 'amount';
+const String columnDate = 'date';
+const String columnCategory = 'category';
+
 const categoryIcons = {
   Category.food: Icons.lunch_dining,
   Category.travel: Icons.flight_takeoff,
@@ -31,6 +38,11 @@ class Expense {
 
   String get formattedDate {
     return fomatter.format(date);
+  }
+
+  @override
+  String toString() {
+    return 'Expense[Title:$title \nAmount:$amount\nDate:$date\nCategory:$category]';
   }
 }
 

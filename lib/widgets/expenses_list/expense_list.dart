@@ -12,29 +12,34 @@ class ExpenseList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListView.builder(
-      itemBuilder: (context, index) => Dismissible(
+      itemBuilder: (ctx, index) => Dismissible(
         background: Container(
           color: Theme.of(context).colorScheme.error.withOpacity(0.8),
           margin: EdgeInsets.symmetric(
               horizontal: Theme.of(context).cardTheme.margin!.horizontal),
         ),
         onDismissed: (direction) {
-          ref.read(expensesProvider.notifier).removeExpense(expenses[index].id);
+          final expenseToRemove = expenses[index];
+          ref.read(expensesProvider.notifier).removeExpense(expenseToRemove.id);
 
-          ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            duration: const Duration(seconds: 3),
-            content: const Text("Expense Deleted."),
-            action: SnackBarAction(
-                label: "undo",
+          ScaffoldMessenger.of(ctx).clearSnackBars();
+
+          ScaffoldMessenger.of(ctx).showSnackBar(
+            SnackBar(
+              duration: const Duration(seconds: 3),
+              content: const Text("Expense Deleted."),
+              action: SnackBarAction(
+                label: "Undo",
                 onPressed: () {
                   ref
                       .read(expensesProvider.notifier)
-                      .addExpenseAt(index, expenses[index]);
-                }),
-          ));
+                      .addExpenseAt(index, expenseToRemove);
+                },
+              ),
+            ),
+          );
         },
-        key: ValueKey(expenses[index]),
+        key: UniqueKey(),
         child: ExpenseItem(expenses[index]),
       ),
       itemCount: expenses.length,

@@ -32,36 +32,36 @@ The app is developed using Flutter. The code is well-organized and commented.
 
 | Expenses Screen mobile light theme                | Expenses Screen mobile dark theme               |
 | ------------------------------------------------- | ----------------------------------------------- |
-| ![expense_mobile_light](expense_mobile_light.png) | ![expense_mobile_dark](expense_mobile_dark.png) |
+| ![expense_mobile_light](screenshots/expense_mobile_light.png) | ![expense_mobile_dark](screenshots/expense_mobile_dark.png) |
 
 | Dismiss expense mobile light theme    | Dismiss expense mobile Dark theme               |
 | ------------------------------------- | ----------------------------------------------- |
-| ![alt text](mobile_dismiss_light.png) | ![mobile_dismiss_dark](mobile_dismiss_dark.png) |
+| ![alt text](screenshots/mobile_dismiss_light.png) | ![mobile_dismiss_dark](screenshots/mobile_dismiss_dark.png) |
 
 | New Expense mobile Screen Light                           | New Expense mobile Screen dark                     |
 | --------------------------------------------------------- | -------------------------------------------------- |
-| ![mobile_new_expense_light](mobile_new_expense_light.png) | ![mobile_new_expense dark](mobile_new_expense.png) |
+| ![mobile_new_expense_light](screenshots/mobile_new_expense_light.png) | ![mobile_new_expense dark](screenshots/mobile_new_expense.png) |
 
 | Expense Screen Desktop Dark                          |
 | ---------------------------------------------------- |
-| ![mobile_new_expense dark](expense_desktop_dark.png) |
+| ![mobile_new_expense dark](screenshots/expense_desktop_dark.png) |
 
 | Expense Screen Desktop Light                          |
 | ----------------------------------------------------- |
-| ![mobile_new_expense dark](expense_desktop_light.png) |
+| ![mobile_new_expense dark](screenshots/expense_desktop_light.png) |
 
 | New Expense Screen Desktop Light                          |
 | --------------------------------------------------------- |
-| ![mobile_new_expense dark](desktop_light_new_expense.png) |
+| ![mobile_new_expense dark](screenshots/desktop_light_new_expense.png) |
 
 | New Expense Screen Desktop Dark                           |
 | --------------------------------------------------------- |
-| ![desktop_dark_new_expense](desktop_dark_new_expense.png) |
+| ![desktop_dark_new_expense](screenshots/desktop_dark_new_expense.png) |
 
 | Dismiss expense Desktop Light                       |
 | --------------------------------------------------- |
-| ![desktop_light_dismiss](desktop_light_dismiss.png) |
+| ![desktop_light_dismiss](screenshots/desktop_light_dismiss.png) |
 
 | Dismiss expense Desktop Dark                       |
 | -------------------------------------------------- |
-| ![desktop_light_dismiss](desktop_dark_dismiss.png) |
+| ![desktop_light_dismiss](screenshots/desktop_dark_dismiss.png) |
