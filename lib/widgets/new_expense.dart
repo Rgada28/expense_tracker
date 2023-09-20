@@ -1,7 +1,11 @@
+import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/models/transaction.dart';
 import 'package:expense_tracker/provider/expenses_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/models/expense.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as path;
+import 'package:sqflite/sqflite.dart' as sql;
+import 'package:uuid/uuid.dart';
 
 class NewExpense extends ConsumerStatefulWidget {
   const NewExpense({super.key});
@@ -27,7 +31,7 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
     setState(() => _selectedDate = pickedDate);
   }
 
-  void _submitExpenseData() {
+  void _submitExpenseData() async {
     final enteredAmount = double.tryParse(_amountController.text);
     final amountIsValid = enteredAmount == null || enteredAmount < 0;
     if (_titleController.text.trim().isEmpty ||
@@ -56,7 +60,13 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
         amount: enteredAmount,
         date: _selectedDate!,
         category: _selectedCategory));
-
+    TransactionProvider transactionProvider = TransactionProvider();
+    final dbPath = await sql.getDatabasesPath();
+    final db = await sql.openDatabase(
+      path.join(dbPath, 'expense_tracker.db'),
+    );
+    transactionProvider.open(db.path);
+    // transactionProvider.insert(UTransaction(transactionId: Uuid().v4(), merchant: merchant, debit: debit, amount: amount, date: _selectedDate!, categoryId: categoryId, accountId: accountId, modeOfPayment: modeOfPayment));
     Navigator.pop(context);
   }
 
