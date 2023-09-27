@@ -1,4 +1,3 @@
-import 'package:expense_tracker/models/transaction.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 
 const String tableAccount = 'account';
@@ -12,14 +11,14 @@ class Account {
   String name;
   int isLending;
   double balance;
-  List<UTransaction> transactions;
-
+  // List<UTransaction> transactions;
+  // List<TransactionDemo> transactions;
   Account({
     required this.id,
     required this.name,
     required this.isLending,
     required this.balance,
-    required this.transactions,
+    // required this.transactions,
   });
 
   Map<String, dynamic> toMap() {
@@ -28,8 +27,8 @@ class Account {
       'name': name,
       'isLending': isLending,
       'balance': balance,
-      'transactions':
-          transactions.map((transaction) => transaction.toMap()).toList(),
+      // 'transactions':
+      //     transactions.map((transaction) => transaction.toMap()).toList(),
     };
   }
 
@@ -39,9 +38,9 @@ class Account {
       name: map['name'],
       isLending: map['isLending'],
       balance: map['balance'],
-      transactions: (map['transactions'] as List<dynamic>)
-          .map((item) => UTransaction.fromMap(item))
-          .toList(),
+      // transactions: (map['transactions'] as List<dynamic>)
+      //     .map((item) => TransactionDemo.fromMap(item))
+      //     .toList(),
     );
   }
 }
@@ -52,11 +51,12 @@ class AccountProvider {
   Future open(String path) async {
     db =
         await sql.openDatabase(path, version: 1, onCreate: (db, version) async {
-      await db.execute('''  CREATE TABLE accounts ( 
+      await db.execute('''  CREATE TABLE account ( 
                accountId INTEGER PRIMARY KEY, 
                accountName TEXT, 
                accountBalance REAL, 
-               transactions TEXT )''');
+               
+                )''');
     });
   }
 
@@ -71,7 +71,7 @@ class AccountProvider {
           columnAccountId,
           columnAccountName,
           columnAccountBalance,
-          columnTransactions,
+          // columnTransactions,
         ],
         where: '$columnAccountId = ?',
         whereArgs: [id]);

@@ -1,10 +1,11 @@
+import 'package:expense_tracker/models/account.dart';
 import 'package:expense_tracker/models/transaction_demo.dart';
-import 'package:expense_tracker/provider/expenses_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path;
+import 'package:sqflite/sqflite.dart' as sql;
 
-import '../models/expense.dart';
 import '../provider/transactions_provider.dart';
 
 class AddNewTransactionScreen extends ConsumerStatefulWidget {
@@ -180,8 +181,9 @@ class _AddNewTransactionScreenState
     );
   }
 
-  void saveTransaction() {
+  void saveTransaction() async {
     TransactionDemoProvider transactionDemoProvider = TransactionDemoProvider();
+    AccountProvider accountProvider = AccountProvider();
     TransactionDemo transactionDemo = TransactionDemo(
         1,
         double.parse(_amountTextEditingController.value.text),
@@ -191,6 +193,15 @@ class _AddNewTransactionScreenState
         int.parse(_selectedAccount),
         int.parse(_selectedModeOfPayment));
     ref.watch(transactionsProvider).add(transactionDemo);
-    transactionDemoProvider.insert(transactionDemo);
+    String dbPath = await sql.getDatabasesPath();
+    await accountProvider.open(path.join(dbPath, 'expense_tracker.db'));
+    accountProvider.insert(Account(
+        id: 1,
+        name: "HDFC BANK",
+        isLending: 0,
+        balance: 21280,
+        transactions: []));
+    await transactionDemoProvider.open(path.join(dbPath, 'expense_tracker.db'));
+    await transactionDemoProvider.insert(transactionDemo);
   }
 }
