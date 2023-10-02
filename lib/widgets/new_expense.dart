@@ -1,3 +1,5 @@
+import 'package:expense_tracker/database/db_helper.dart';
+import 'package:expense_tracker/models/account.dart';
 import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/models/transaction.dart';
 import 'package:expense_tracker/provider/expenses_provider.dart';
@@ -55,18 +57,14 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
           });
       return;
     }
+    DbHelper.db.addAccountToDatabase(Account(id: 1, name: "HDFC", isLending: 0, balance: 4000));
+    DbHelper.db.addTransactionToDatabase(UTransaction(transactionId: 1, merchant: "Test", debit: 1, amount: enteredAmount, date: _selectedDate!, categoryId: 1, accountId: 1, modeOfPayment: "UPI"));
     ref.watch(expensesProvider.notifier).addExpense(Expense(
         title: _titleController.text.trim(),
         amount: enteredAmount,
         date: _selectedDate!,
         category: _selectedCategory));
-    TransactionProvider transactionProvider = TransactionProvider();
-    final dbPath = await sql.getDatabasesPath();
-    final db = await sql.openDatabase(
-      path.join(dbPath, 'expense_tracker.db'),
-    );
-    transactionProvider.open(db.path);
-    // transactionProvider.insert(UTransaction(transactionId: Uuid().v4(), merchant: merchant, debit: debit, amount: amount, date: _selectedDate!, categoryId: categoryId, accountId: accountId, modeOfPayment: modeOfPayment));
+
     Navigator.pop(context);
   }
 

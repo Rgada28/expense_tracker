@@ -1,16 +1,30 @@
+import 'package:expense_tracker/database/db_helper.dart';
 import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/provider/expenses_provider.dart';
 import 'package:expense_tracker/widgets/expenses_list/expense_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ExpenseList extends ConsumerWidget {
+import '../../models/transaction.dart';
+
+class ExpenseList extends ConsumerStatefulWidget {
   const ExpenseList({super.key, required this.expenses});
-
   final List<Expense> expenses;
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ExpenseList> createState() => _ExpenseListState();
+}
+
+class _ExpenseListState extends ConsumerState<ExpenseList> {
+
+  Future<List<UTransaction>> fetchTransactions()async{
+
+    List<UTransaction> transactions = await DbHelper.db.getAllPersons();
+    widget.expenses.clear();
+    widget.expenses.addAll(transactions.map((e) => Expense(title: e.merchant, amount: e.amount, date: e.date, category: Category.food)));
+    return transactions;
+  }
+  @override
+  Widget build(BuildContext context) {
     return ListView.builder(
       itemBuilder: (ctx, index) => Dismissible(
         background: Container(
@@ -19,7 +33,7 @@ class ExpenseList extends ConsumerWidget {
               horizontal: Theme.of(context).cardTheme.margin!.horizontal),
         ),
         onDismissed: (direction) {
-          final expenseToRemove = expenses[index];
+          final expenseToRemove = widget.expenses[index];
           ref.read(expensesProvider.notifier).removeExpense(expenseToRemove.id);
 
           ScaffoldMessenger.of(ctx).clearSnackBars();
@@ -40,9 +54,9 @@ class ExpenseList extends ConsumerWidget {
           );
         },
         key: UniqueKey(),
-        child: ExpenseItem(expenses[index]),
+        child: ExpenseItem(widget.expenses[index]),
       ),
-      itemCount: expenses.length,
+      itemCount: widget.expenses.length,
     );
   }
 }

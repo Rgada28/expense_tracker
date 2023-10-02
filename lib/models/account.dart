@@ -27,8 +27,6 @@ class Account {
       'name': name,
       'isLending': isLending,
       'balance': balance,
-      // 'transactions':
-      //     transactions.map((transaction) => transaction.toMap()).toList(),
     };
   }
 

@@ -33,12 +33,12 @@ class Expenses extends ConsumerWidget {
         title: const Text("Flutter ExpenseTracker"),
         actions: [
           IconButton(
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (builder) {
-                return const AddNewTransactionScreen();
-              }));
-            },
-            // onPressed: () => _openAddExpenseOverlay(context),
+            // onPressed: () {
+            //   Navigator.push(context, MaterialPageRoute(builder: (builder) {
+            //     return const AddNewTransactionScreen();
+            //   }));
+            // },
+            onPressed: () => _openAddExpenseOverlay(context),
             icon: const Icon(Icons.add),
           )
         ],

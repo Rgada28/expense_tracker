@@ -200,7 +200,7 @@ class _AddNewTransactionScreenState
         name: "HDFC BANK",
         isLending: 0,
         balance: 21280,
-        transactions: []));
+        ));
     await transactionDemoProvider.open(path.join(dbPath, 'expense_tracker.db'));
     await transactionDemoProvider.insert(transactionDemo);
   }
