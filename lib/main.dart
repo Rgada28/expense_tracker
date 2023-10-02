@@ -1,3 +1,4 @@
+import 'package:expense_tracker/screens/add_new_transaction_screen.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 
@@ -68,6 +69,7 @@ void main() {
         ),
         // themeMode: ThemeMode.system, // default
         home: const Expenses(),
+        // home: const AddNewTransactionScreen(),
       ),
     ),
   );
