@@ -1,13 +1,9 @@
 import 'package:expense_tracker/provider/expenses_provider.dart';
-import 'package:expense_tracker/provider/transactions_provider.dart';
-import 'package:expense_tracker/screens/add_new_transaction_screen.dart';
-import 'package:expense_tracker/screens/transactions_list.dart';
 import 'package:expense_tracker/widgets/chart/chart.dart';
+import 'package:expense_tracker/widgets/expenses_list/expense_list.dart';
 import 'package:expense_tracker/widgets/new_expense.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'expenses_list/expense_list.dart';
 
 class Expenses extends ConsumerWidget {
   const Expenses({super.key});
@@ -47,29 +43,27 @@ class Expenses extends ConsumerWidget {
           ? Column(
               children: [
                 Chart(expenses: ref.watch(expensesProvider)),
-                Expanded(
-                    child: ref.watch(expensesProvider).isEmpty
-                        ? mainContent
-                        : TransactionList(
-                            transactions: ref.watch(transactionsProvider))
-                    // ExpenseList(
-                    //     expenses: ref.watch(expensesProvider),
-                    //   ),
-                    ),
+                const Expanded(
+                  child:
+                  // ref.watch(expensesProvider).isEmpty
+                  //     ? mainContent
+                      // : TransactionList(
+                      //     transactions: ref.watch(transactionsProvider))
+                       ExpenseList(),
+                ),
               ],
             )
           : Row(
               children: [
                 Expanded(child: Chart(expenses: ref.watch(expensesProvider))),
-                Expanded(
-                    child: ref.watch(expensesProvider).isEmpty
-                        ? mainContent
-                        : TransactionList(
-                            transactions: ref.watch(transactionsProvider))
-                    // ExpenseList(
-                    //     expenses: ref.watch(expensesProvider),
-                    //   ),
-                    ),
+                const Expanded(
+                  child:
+                  // ref.watch(expensesProvider).isEmpty
+                  //     ? mainContent
+                      // : TransactionList(
+                      //     transactions: ref.watch(transactionsProvider))
+                      ExpenseList(),
+                ),
               ],
             ),
     );

@@ -1,6 +1,11 @@
 
+import 'package:intl/intl.dart';
+
+DateFormat formatter = DateFormat.yMd();
+
+
 class UTransaction {
-  int transactionId;
+  int? transactionId;
   String merchant;
   String? subMerchant;
   int debit;
@@ -13,8 +18,12 @@ class UTransaction {
   int accountId;
   String modeOfPayment;
 
+  String get formattedDate {
+    return formatter.format(date);
+  }
+
   UTransaction({
-    required this.transactionId,
+    this.transactionId,
     required this.merchant,
     this.subMerchant,
     required this.debit,
@@ -44,19 +53,24 @@ class UTransaction {
     };
   }
 
+  @override
+  String toString() {
+    return 'UTransaction{transactionId: $transactionId, merchant: $merchant, subMerchant: $subMerchant, debit: $debit, amount: $amount, cashback: $cashback, date: $date, ownShare: $ownShare, description: $description, categoryId: $categoryId, accountId: $accountId, modeOfPayment: $modeOfPayment}';
+  }
+
   factory UTransaction.fromMap(Map<String, dynamic> map) {
     return UTransaction(
       transactionId: map['id'],
       merchant: map['merchant'],
       debit: map['debit'],
       amount: map['amount'] as double,
-      cashback: map['cashback'] as double,
+      // cashback: map['cashback'] as double,
       date: DateTime.parse(map['date']),
-      ownShare: map['ownShare'] as double,
-      description: map['description'],
-      categoryId: map['categoryId'],
-      accountId: map['accountId'],
-      modeOfPayment: map['modeOfPayment'],
+      // ownShare: map['ownShare'] as double,
+      // description: map['description'],
+      categoryId: map['category_id'],
+      accountId: map['account_id'],
+      modeOfPayment: map['mode_of_payment'],
     );
   }
 }

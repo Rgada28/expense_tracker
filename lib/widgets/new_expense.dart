@@ -5,9 +5,6 @@ import 'package:expense_tracker/models/transaction.dart';
 import 'package:expense_tracker/provider/expenses_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart' as path;
-import 'package:sqflite/sqflite.dart' as sql;
-import 'package:uuid/uuid.dart';
 
 class NewExpense extends ConsumerStatefulWidget {
   const NewExpense({super.key});
@@ -21,6 +18,20 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
   final _amountController = TextEditingController();
   DateTime? _selectedDate;
   Category _selectedCategory = Category.leisure;
+ final List<Account> accounts =[];
+ late Account _selectedAccount;
+
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedAccount = Account( id: -1, name: "Select Account", isLending: 0, balance: 0);
+    accounts.add(_selectedAccount);
+    populateAccountsDropDownMenu();
+  }
+  void populateAccountsDropDownMenu() async{
+    accounts.addAll(await DbHelper.db.getAllAccounts());
+  }
 
   void _presentDatePicker() async {
     final now = DateTime.now();
@@ -38,14 +49,14 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
     final amountIsValid = enteredAmount == null || enteredAmount < 0;
     if (_titleController.text.trim().isEmpty ||
         amountIsValid ||
-        _selectedDate == null) {
+        _selectedDate == null || _selectedAccount!=null || _selectedAccount!.id!>=0) {
       showDialog(
           context: context,
           builder: (ctx) {
             return AlertDialog(
               title: const Text("Invalid Input"),
               content: const Text(
-                  "Please make sure a valid Title, Amount or Date has been entered"),
+                  "Please make sure a valid Title, Amount or Date has been entered or an Account has been selected"),
               actions: [
                 TextButton(
                     onPressed: () {
@@ -57,8 +68,16 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
           });
       return;
     }
-    DbHelper.db.addAccountToDatabase(Account(id: 1, name: "HDFC", isLending: 0, balance: 4000));
-    DbHelper.db.addTransactionToDatabase(UTransaction(transactionId: 1, merchant: "Test", debit: 1, amount: enteredAmount, date: _selectedDate!, categoryId: 1, accountId: 1, modeOfPayment: "UPI"));
+    DbHelper.db.addAccountToDatabase(
+        Account(name: "HDFC", isLending: 0, balance: 4000));
+    DbHelper.db.addTransactionToDatabase(UTransaction(
+        merchant: _titleController.text.trim(),
+        debit: 1,
+        amount: enteredAmount,
+        date: _selectedDate!,
+        categoryId: 1,
+        accountId: 1,
+        modeOfPayment: "UPI"));
     ref.watch(expensesProvider.notifier).addExpense(Expense(
         title: _titleController.text.trim(),
         amount: enteredAmount,
@@ -203,6 +222,7 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                   if (width >= 600)
                     Row(
                       children: [
+                        //TODO place accounts drop down here
                         const Spacer(),
                         TextButton(
                             onPressed: () {
@@ -216,36 +236,59 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                       ],
                     )
                   else
-                    Row(
+                    Column(
                       children: [
                         DropdownButton(
-                            value: _selectedCategory,
-                            items: Category.values
+                            value: _selectedAccount,
+                            items: accounts
                                 .map(
-                                  (category) => DropdownMenuItem(
-                                    value: category,
-                                    child: Text(
-                                      category.name.toUpperCase(),
-                                    ),
-                                  ),
-                                )
+                                  (account) => DropdownMenuItem(
+                                value: account,
+                                child: Text(
+                                  account.name.toUpperCase(),
+                                ),
+                              ),
+                            )
                                 .toList(),
                             onChanged: (value) {
                               if (value != null) {
                                 setState(() {
-                                  _selectedCategory = value;
+                                  _selectedAccount = value;
                                 });
                               }
                             }),
-                        const Spacer(),
-                        TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text("Cancel")),
-                        ElevatedButton(
-                          onPressed: _submitExpenseData,
-                          child: const Text("Save Expense"),
+                        Row(
+                          children: [
+                            DropdownButton(
+                                value: _selectedCategory,
+                                items: Category.values
+                                    .map(
+                                      (category) => DropdownMenuItem(
+                                        value: category,
+                                        child: Text(
+                                          category.name.toUpperCase(),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      _selectedCategory = value;
+                                    });
+                                  }
+                                }),
+                            const Spacer(),
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text("Cancel")),
+                            ElevatedButton(
+                              onPressed: _submitExpenseData,
+                              child: const Text("Save Expense"),
+                            ),
+                          ],
                         ),
                       ],
                     )

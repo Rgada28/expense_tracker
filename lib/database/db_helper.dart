@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:expense_tracker/models/account.dart';
 import 'package:expense_tracker/models/transaction.dart';
@@ -24,7 +23,7 @@ class DbHelper {
         onCreate: (Database db, int version) async {
       await db.execute('''
           CREATE TABLE accounts (
-            id INTEGER PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT ,
             name TEXT NOT NULL,
             isLending INTEGER NOT NULL,
             balance REAL
@@ -41,16 +40,24 @@ class DbHelper {
                account_id INTEGER, 
                amount REAL,               
                FOREIGN KEY (account_id) REFERENCES accounts(account_id))''');
-
-        });
+    });
   }
 
-Future<List<UTransaction>> getAllPersons() async {
-  final db = await database;
-  var response = await db.query("user_transactions");
-  List<UTransaction> list = response.map((c) => UTransaction.fromMap(c)).toList();
-  return list;
-}
+  Future<List<UTransaction>> getAllTransactions() async {
+    final db = await database;
+    var response = await db.query("user_transactions");
+    List<UTransaction> list =
+        response.map((c) => UTransaction.fromMap(c)).toList();
+    return list;
+  }
+
+  Future<List<Account>> getAllAccounts() async {
+    final db = await database;
+    var response = await db.query("accounts");
+    List<Account> list =
+    response.map((c) => Account.fromMap(c)).toList();
+    return list;
+  }
 
   addAccountToDatabase(Account account) async {
     final db = await database;

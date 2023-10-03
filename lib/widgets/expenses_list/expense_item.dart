@@ -1,25 +1,25 @@
-import 'package:expense_tracker/widgets/expense_detail.dart';
+import 'package:expense_tracker/models/transaction.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/expense.dart';
 
 class ExpenseItem extends StatelessWidget {
   const ExpenseItem(
-    this.expense, {
+    this.transaction, {
     super.key,
   });
 
-  final Expense expense;
+  final UTransaction transaction;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(builder: (builder) {
-          return ExpenseDetailScreen(
-            expense: expense,
-          );
-        }));
+        // Navigator.of(context).push(MaterialPageRoute(builder: (builder) {
+        //   return ExpenseDetailScreen(
+        //     expense: transaction,
+        //   );
+        // }));
       },
       child: Card(
         child: Padding(
@@ -28,7 +28,7 @@ class ExpenseItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                expense.title,
+                transaction.merchant,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(
@@ -36,17 +36,17 @@ class ExpenseItem extends StatelessWidget {
               ),
               Row(
                 children: [
-                  Text('\$ ${expense.amount.toStringAsFixed(2)}'),
+                  Text('\$ ${transaction.amount.toStringAsFixed(2)}'),
                   const Spacer(),
                   Row(
                     children: [
                       Icon(
-                        categoryIcons[expense.category],
+                        categoryIcons[transaction.categoryId],
                       ),
                       const SizedBox(
                         width: 8,
                       ),
-                      Text(expense.formattedDate),
+                      Text(transaction.formattedDate),
                       const SizedBox(
                         width: 8,
                       ),

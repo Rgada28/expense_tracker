@@ -19,10 +19,11 @@ class AddNewTransactionScreen extends ConsumerStatefulWidget {
 class _AddNewTransactionScreenState
     extends ConsumerState<AddNewTransactionScreen> {
   DateFormat fomatter = DateFormat.yMd();
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  TextEditingController _descriptionTextEditingController =
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _descriptionTextEditingController =
       TextEditingController();
-  TextEditingController _amountTextEditingController = TextEditingController();
+  final TextEditingController _amountTextEditingController =
+      TextEditingController();
   DateTime? _selectedDate;
   bool isCashback = false;
   late String _selectedAccount;
@@ -182,26 +183,26 @@ class _AddNewTransactionScreenState
   }
 
   void saveTransaction() async {
-    TransactionDemoProvider transactionDemoProvider = TransactionDemoProvider();
-    AccountProvider accountProvider = AccountProvider();
-    TransactionDemo transactionDemo = TransactionDemo(
-        1,
-        double.parse(_amountTextEditingController.value.text),
-        _selectedDate!,
-        _descriptionTextEditingController.value.text,
-        int.parse(_selectedCategory),
-        int.parse(_selectedAccount),
-        int.parse(_selectedModeOfPayment));
-    ref.watch(transactionsProvider).add(transactionDemo);
-    String dbPath = await sql.getDatabasesPath();
-    await accountProvider.open(path.join(dbPath, 'expense_tracker.db'));
-    accountProvider.insert(Account(
-        id: 1,
-        name: "HDFC BANK",
-        isLending: 0,
-        balance: 21280,
-        ));
-    await transactionDemoProvider.open(path.join(dbPath, 'expense_tracker.db'));
-    await transactionDemoProvider.insert(transactionDemo);
+    // TransactionDemoProvider transactionDemoProvider = TransactionDemoProvider();
+    // // AccountProvider accountProvider = AccountProvider();
+    // TransactionDemo transactionDemo = TransactionDemo(
+    //     1,
+    //     double.parse(_amountTextEditingController.value.text),
+    //     _selectedDate!,
+    //     _descriptionTextEditingController.value.text,
+    //     int.parse(_selectedCategory),
+    //     int.parse(_selectedAccount),
+    //     int.parse(_selectedModeOfPayment));
+    // ref.watch(transactionsProvider).add(transactionDemo);
+    // String dbPath = await sql.getDatabasesPath();
+    // await accountProvider.open(path.join(dbPath, 'expense_tracker.db'));
+    // accountProvider.insert(Account(
+    //   id: 1,
+    //   name: "HDFC BANK",
+    //   isLending: 0,
+    //   balance: 21280,
+    // ));
+    // await transactionDemoProvider.open(path.join(dbPath, 'expense_tracker.db'));
+    // await transactionDemoProvider.insert(transactionDemo);
   }
 }
