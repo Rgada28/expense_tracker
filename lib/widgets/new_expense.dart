@@ -49,7 +49,7 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
     if (_titleController.text.trim().isEmpty ||
         amountIsValid ||
         _selectedDate == null ||
-        _selectedAccount != null) {
+        _selectedAccount == null) {
       showDialog(
           context: context,
           builder: (ctx) {

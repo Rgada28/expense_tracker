@@ -1,4 +1,5 @@
 import 'package:expense_tracker/models/account.dart';
+import 'package:expense_tracker/screen/add_new_account_screen.dart';
 import 'package:flutter/material.dart';
 
 class AccountsDialog extends StatefulWidget {
@@ -28,14 +29,25 @@ class _AccountsDialogState extends State<AccountsDialog> {
           borderRadius: BorderRadius.all(Radius.circular(20))),
       actions: <Widget>[
         TextButton(
-          child: const Text('CANCEL'),
+          child: const Text('Cancel'),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         TextButton(
           child: const Text('Add New'),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context);
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return const AddNewAccountScreen();
+            }));
+          },
+        ),
+        TextButton(
+          child: const Text('Done'),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
       ],
       content: SingleChildScrollView(
@@ -54,18 +66,25 @@ class _AccountsDialogState extends State<AccountsDialog> {
                     itemCount: accounts.length,
                     itemBuilder: (BuildContext context, int index) {
                       Account currentElement = accounts[index];
-                      return ListTile(
-                        title: Text(currentElement.name),
-                        trailing: _selected == currentElement
-                            ? const Icon(Icons.done)
-                            : null,
-                        onTap: () {
-                          setState(() {
-                            _selected = currentElement;
-                            widget.onSelectAccount(currentElement);
-                            Navigator.pop(context);
-                          });
-                        },
+                      return Column(
+                        children: [
+                          ListTile(
+                            title: Text(currentElement.name),
+                            trailing: _selected == currentElement
+                                ? const Icon(Icons.done)
+                                : null,
+                            selected: currentElement == _selected,
+                            selectedColor: Colors.green,
+                            onTap: () {
+                              setState(() {
+                                _selected = currentElement;
+                                widget.onSelectAccount(currentElement);
+                                // Navigator.pop(context);
+                              });
+                            },
+                          ),
+                          const Divider()
+                        ],
                       );
                     }),
               ),
