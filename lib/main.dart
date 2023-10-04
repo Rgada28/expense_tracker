@@ -1,8 +1,5 @@
-import 'package:expense_tracker/screens/add_new_transaction_screen.dart';
-import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
-
 import 'package:expense_tracker/widgets/expenses.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 var kColorScheme = ColorScheme.fromSeed(
@@ -69,7 +66,6 @@ void main() {
         ),
         // themeMode: ThemeMode.system, // default
         home: const Expenses(),
-        // home: const AddNewTransactionScreen(),
       ),
     ),
   );

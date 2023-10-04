@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:expense_tracker/models/account.dart';
-import 'package:expense_tracker/models/transaction.dart';
+import 'package:expense_tracker/models/user_transaction.dart';
 import 'package:path/path.dart' as path;
 import 'package:sqflite/sqflite.dart';
 
@@ -43,19 +43,18 @@ class DbHelper {
     });
   }
 
-  Future<List<UTransaction>> getAllTransactions() async {
+  Future<List<UserTransaction>> getAllTransactions() async {
     final db = await database;
     var response = await db.query("user_transactions");
-    List<UTransaction> list =
-        response.map((c) => UTransaction.fromMap(c)).toList();
+    List<UserTransaction> list =
+        response.map((c) => UserTransaction.fromMap(c)).toList();
     return list;
   }
 
   Future<List<Account>> getAllAccounts() async {
     final db = await database;
     var response = await db.query("accounts");
-    List<Account> list =
-    response.map((c) => Account.fromMap(c)).toList();
+    List<Account> list = response.map((c) => Account.fromMap(c)).toList();
     return list;
   }
 
@@ -69,7 +68,7 @@ class DbHelper {
     return raw;
   }
 
-  addTransactionToDatabase(UTransaction transaction) async {
+  addTransactionToDatabase(UserTransaction transaction) async {
     final db = await database;
     var raw = await db.insert(
       "user_transactions",

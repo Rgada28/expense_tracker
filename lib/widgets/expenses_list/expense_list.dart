@@ -1,5 +1,5 @@
 import 'package:expense_tracker/database/db_helper.dart';
-import 'package:expense_tracker/models/transaction.dart';
+import 'package:expense_tracker/models/user_transaction.dart';
 import 'package:expense_tracker/widgets/expenses_list/expense_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,9 +11,9 @@ class ExpenseList extends ConsumerStatefulWidget {
 }
 
 class _ExpenseListState extends ConsumerState<ExpenseList> {
-  List<UTransaction> transactions = [];
+  List<UserTransaction> transactions = [];
 
-  Future<List<UTransaction>> fetchTransactions() async {
+  Future<List<UserTransaction>> fetchTransactions() async {
     transactions = await DbHelper.db.getAllTransactions();
     print(transactions.length);
     print(transactions);
@@ -24,9 +24,9 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: fetchTransactions(),
-      builder:  (context, snapshot) {
-        if(snapshot.hasData){
-         return ListView.builder(
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return ListView.builder(
             itemBuilder: (ctx, index) => Dismissible(
               background: Container(
                 color: Theme.of(context).colorScheme.error.withOpacity(0.8),
@@ -34,7 +34,8 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
                     horizontal: Theme.of(context).cardTheme.margin!.horizontal),
               ),
               onDismissed: (direction) {
-                final expenseToRemove = transactions[index];
+                //TODO Remove Expense from Database
+                // final expenseToRemove = transactions[index];
                 // ref.read(expensesProvider.notifier).removeExpense(expenseToRemove!.transactionId);
 
                 ScaffoldMessenger.of(ctx).clearSnackBars();
@@ -60,7 +61,7 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
             itemCount: transactions.length,
           );
         }
-        if(snapshot.connectionState == ConnectionState.waiting){
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: Text("Fetching Data"),
           );
@@ -69,7 +70,6 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
           child: Text("No Transactions"),
         );
       },
-
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:expense_tracker/database/db_helper.dart';
 import 'package:expense_tracker/models/account.dart';
 import 'package:expense_tracker/models/expense.dart';
-import 'package:expense_tracker/models/transaction.dart';
+import 'package:expense_tracker/models/user_transaction.dart';
 import 'package:expense_tracker/provider/expenses_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,18 +18,19 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
   final _amountController = TextEditingController();
   DateTime? _selectedDate;
   Category _selectedCategory = Category.leisure;
- final List<Account> accounts =[];
- late Account _selectedAccount;
-
+  final List<Account> accounts = [];
+  late Account _selectedAccount;
 
   @override
   void initState() {
     super.initState();
-    _selectedAccount = Account( id: -1, name: "Select Account", isLending: 0, balance: 0);
+    _selectedAccount =
+        Account(id: -1, name: "Select Account", isLending: 0, balance: 0);
     accounts.add(_selectedAccount);
     populateAccountsDropDownMenu();
   }
-  void populateAccountsDropDownMenu() async{
+
+  void populateAccountsDropDownMenu() async {
     accounts.addAll(await DbHelper.db.getAllAccounts());
   }
 
@@ -49,7 +50,8 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
     final amountIsValid = enteredAmount == null || enteredAmount < 0;
     if (_titleController.text.trim().isEmpty ||
         amountIsValid ||
-        _selectedDate == null || _selectedAccount!=null || _selectedAccount!.id!>=0) {
+        _selectedDate == null ||
+        _selectedAccount.id == -1) {
       showDialog(
           context: context,
           builder: (ctx) {
@@ -70,7 +72,7 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
     }
     DbHelper.db.addAccountToDatabase(
         Account(name: "HDFC", isLending: 0, balance: 4000));
-    DbHelper.db.addTransactionToDatabase(UTransaction(
+    DbHelper.db.addTransactionToDatabase(UserTransaction(
         merchant: _titleController.text.trim(),
         debit: 1,
         amount: enteredAmount,
@@ -243,12 +245,12 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                             items: accounts
                                 .map(
                                   (account) => DropdownMenuItem(
-                                value: account,
-                                child: Text(
-                                  account.name.toUpperCase(),
-                                ),
-                              ),
-                            )
+                                    value: account,
+                                    child: Text(
+                                      account.name.toUpperCase(),
+                                    ),
+                                  ),
+                                )
                                 .toList(),
                             onChanged: (value) {
                               if (value != null) {

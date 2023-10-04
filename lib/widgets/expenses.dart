@@ -21,19 +21,11 @@ class Expenses extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final width = MediaQuery.of(context).size.width;
-    Widget mainContent = const Center(
-      child: Text("No expenses found. Start adding some!"),
-    );
     return Scaffold(
       appBar: AppBar(
         title: const Text("Flutter ExpenseTracker"),
         actions: [
           IconButton(
-            // onPressed: () {
-            //   Navigator.push(context, MaterialPageRoute(builder: (builder) {
-            //     return const AddNewTransactionScreen();
-            //   }));
-            // },
             onPressed: () => _openAddExpenseOverlay(context),
             icon: const Icon(Icons.add),
           )
@@ -44,12 +36,7 @@ class Expenses extends ConsumerWidget {
               children: [
                 Chart(expenses: ref.watch(expensesProvider)),
                 const Expanded(
-                  child:
-                  // ref.watch(expensesProvider).isEmpty
-                  //     ? mainContent
-                      // : TransactionList(
-                      //     transactions: ref.watch(transactionsProvider))
-                       ExpenseList(),
+                  child: ExpenseList(),
                 ),
               ],
             )
@@ -57,12 +44,7 @@ class Expenses extends ConsumerWidget {
               children: [
                 Expanded(child: Chart(expenses: ref.watch(expensesProvider))),
                 const Expanded(
-                  child:
-                  // ref.watch(expensesProvider).isEmpty
-                  //     ? mainContent
-                      // : TransactionList(
-                      //     transactions: ref.watch(transactionsProvider))
-                      ExpenseList(),
+                  child: ExpenseList(),
                 ),
               ],
             ),
