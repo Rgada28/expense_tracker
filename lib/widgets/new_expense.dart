@@ -3,6 +3,7 @@ import 'package:expense_tracker/models/account.dart';
 import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/models/user_transaction.dart';
 import 'package:expense_tracker/provider/expenses_provider.dart';
+import 'package:expense_tracker/widgets/accounts_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,14 +20,11 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
   DateTime? _selectedDate;
   Category _selectedCategory = Category.leisure;
   final List<Account> accounts = [];
-  late Account _selectedAccount;
+  Account? _selectedAccount;
 
   @override
   void initState() {
     super.initState();
-    _selectedAccount =
-        Account(id: -1, name: "Select Account", isLending: 0, balance: 0);
-    accounts.add(_selectedAccount);
     populateAccountsDropDownMenu();
   }
 
@@ -45,13 +43,13 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
     setState(() => _selectedDate = pickedDate);
   }
 
-  void _submitExpenseData() async {
+  void _submitExpenseData() {
     final enteredAmount = double.tryParse(_amountController.text);
     final amountIsValid = enteredAmount == null || enteredAmount < 0;
     if (_titleController.text.trim().isEmpty ||
         amountIsValid ||
         _selectedDate == null ||
-        _selectedAccount.id == -1) {
+        _selectedAccount != null) {
       showDialog(
           context: context,
           builder: (ctx) {
@@ -70,6 +68,7 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
           });
       return;
     }
+
     DbHelper.db.addAccountToDatabase(
         Account(name: "HDFC", isLending: 0, balance: 4000));
     DbHelper.db.addTransactionToDatabase(UserTransaction(
@@ -87,6 +86,24 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
         category: _selectedCategory));
 
     Navigator.pop(context);
+  }
+
+  void _selectAccountsDialogue() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AccountsDialog(
+            accounts: accounts,
+            onSelectAccount: selectedAccount,
+          );
+        });
+    return;
+  }
+
+  void selectedAccount(Account account) {
+    setState(() {
+      _selectedAccount = account;
+    });
   }
 
   @override
@@ -147,6 +164,7 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                     ),
                   if (width >= 600)
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         DropdownButton(
                             value: _selectedCategory,
@@ -167,6 +185,17 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                                 });
                               }
                             }),
+                        const SizedBox(
+                          width: 100,
+                        ),
+                        TextButton(
+                            onPressed: _selectAccountsDialogue,
+                            child: Text(_selectedAccount == null
+                                ? "Select Account"
+                                : "Selected Account")),
+                        Text(_selectedAccount == null
+                            ? "Please select an account"
+                            : _selectedAccount!.name),
                         Expanded(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -224,7 +253,6 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                   if (width >= 600)
                     Row(
                       children: [
-                        //TODO place accounts drop down here
                         const Spacer(),
                         TextButton(
                             onPressed: () {
@@ -240,25 +268,18 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                   else
                     Column(
                       children: [
-                        DropdownButton(
-                            value: _selectedAccount,
-                            items: accounts
-                                .map(
-                                  (account) => DropdownMenuItem(
-                                    value: account,
-                                    child: Text(
-                                      account.name.toUpperCase(),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() {
-                                  _selectedAccount = value;
-                                });
-                              }
-                            }),
+                        Row(
+                          children: [
+                            TextButton(
+                                onPressed: _selectAccountsDialogue,
+                                child: Text(_selectedAccount == null
+                                    ? "Select Account"
+                                    : "Selected Account")),
+                            Text(_selectedAccount == null
+                                ? "Please select an account"
+                                : _selectedAccount!.name),
+                          ],
+                        ),
                         Row(
                           children: [
                             DropdownButton(
