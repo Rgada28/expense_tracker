@@ -1,49 +1,53 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 
-import '../models/expense.dart';
+import '../models/expense.dart'; // Assuming Expense and Category models are in here
 
-final expensesProvider =
-    StateNotifierProvider<ExpensesNotifier, List<Expense>>((ref) {
-  return ExpensesNotifier();
-});
+// Removed: final expensesProvider = ... (Riverpod specific)
 
-class ExpensesNotifier extends StateNotifier<List<Expense>> {
-  ExpensesNotifier()
-      : super([
-          Expense(
-              title: "Cab",
-              amount: 9.99,
-              date: DateTime.now(),
-              category: Category.travel),
-          Expense(
-              title: "Movie",
-              amount: 15.49,
-              date: DateTime.now(),
-              category: Category.leisure)
-        ]);
+class ExpensesController extends GetxController {
+  // Use RxList for observable list
+  var expenses = <Expense>[].obs;
+
+  ExpensesController() {
+    // Initialize with default expenses
+    expenses.value = [
+      Expense(
+          title: "Cab",
+          amount: 9.99,
+          date: DateTime.now(),
+          category: Category.travel),
+      Expense(
+          title: "Movie",
+          amount: 15.49,
+          date: DateTime.now(),
+          category: Category.leisure)
+    ];
+  }
 
   void addExpense(Expense expense) {
-    state = [...state, expense];
+    expenses.add(expense);
   }
 
   void addExpenseAt(int index, Expense expense) {
-    final updatedExpenses = [...state];
-    updatedExpenses.insert(index, expense);
-    state = updatedExpenses;
+    // RxList handles observable changes automatically
+    expenses.insert(index, expense);
   }
 
   void updateExpense(Expense updatedExpense) {
     final index =
-        state.indexWhere((expense) => expense.id == updatedExpense.id);
+        expenses.indexWhere((expense) => expense.id == updatedExpense.id);
 
     if (index != -1) {
-      final updatedExpenses = [...state];
-      updatedExpenses[index] = updatedExpense;
-      state = updatedExpenses;
+      // RxList handles observable changes automatically
+      expenses[index] = updatedExpense;
     }
   }
 
   void removeExpense(String expenseId) {
-    state = state.where((expense) => expense.id != expenseId).toList();
+    // RxList handles observable changes automatically
+    expenses.removeWhere((expense) => expense.id == expenseId);
   }
+
+  // Optional: If you need to provide a way to get the raw list (not observable)
+  // List<Expense> get plainExpenses => expenses.toList();
 }
