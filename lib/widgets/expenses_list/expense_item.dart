@@ -1,23 +1,26 @@
-import 'package:expense_tracker/models/transaction.dart';
+// Removed: import 'package:expense_tracker/models/transaction.dart'; // No longer using UTransaction
 import 'package:flutter/material.dart';
 
-import '../../models/expense.dart';
+import '../../models/expense.dart'; // Using Expense model
 
 class ExpenseItem extends StatelessWidget {
   const ExpenseItem(
-    this.transaction, {
+    this.expense, { // Changed parameter name and type
     super.key,
   });
 
-  final UTransaction transaction;
+  final Expense expense; // Changed to Expense type
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
+        // If an ExpenseDetailScreen exists and is needed for Expense objects,
+        // this navigation logic would need to be updated or re-enabled.
+        // For now, keeping it commented as per original.
         // Navigator.of(context).push(MaterialPageRoute(builder: (builder) {
-        //   return ExpenseDetailScreen(
-        //     expense: transaction,
+        //   return ExpenseDetailScreen( // This screen would also need to accept Expense
+        //     expense: expense,
         //   );
         // }));
       },
@@ -28,7 +31,7 @@ class ExpenseItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                transaction.merchant,
+                expense.title, // Use expense.title
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(
@@ -36,20 +39,20 @@ class ExpenseItem extends StatelessWidget {
               ),
               Row(
                 children: [
-                  Text('\$ ${transaction.amount.toStringAsFixed(2)}'),
+                  Text('\$${expense.amount.toStringAsFixed(2)}'), // Use expense.amount
                   const Spacer(),
                   Row(
                     children: [
                       Icon(
-                        categoryIcons[transaction.categoryId],
+                        categoryIcons[expense.category], // Use expense.category
                       ),
                       const SizedBox(
                         width: 8,
                       ),
-                      Text(transaction.formattedDate),
-                      const SizedBox(
-                        width: 8,
-                      ),
+                      Text(expense.formattedDate), // Use expense.formattedDate (from Expense model)
+                      // const SizedBox( // This SizedBox seems redundant if formattedDate is the last item
+                      //   width: 8,
+                      // ),
                     ],
                   )
                 ],

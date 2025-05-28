@@ -50,7 +50,7 @@ class Expenses extends StatelessWidget {
           ? Column(
               children: [
                 // Chart now receives the RxList. Chart widget itself will need to handle it.
-                Chart(expenses: expensesController.expenses), 
+                const Chart(), 
                 const Expanded(
                   // ExpenseList will be refactored to use ExpensesController
                   child: ExpenseList(),
@@ -60,7 +60,7 @@ class Expenses extends StatelessWidget {
           : Row(
               children: [
                 // Chart now receives the RxList. Chart widget itself will need to handle it.
-                Expanded(child: Chart(expenses: expensesController.expenses)),
+                const Expanded(child: Chart()),
                 const Expanded(
                   // ExpenseList will be refactored to use ExpensesController
                   child: ExpenseList(),

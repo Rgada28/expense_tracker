@@ -4,8 +4,11 @@ import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/models/transaction.dart';
 import 'package:expense_tracker/provider/expenses_provider.dart'; // Will be GetX controller
 import 'package:flutter/material.dart';
-// Removed: import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart'; // Added GetX import
+import 'package:intl/intl.dart'; // Moved import to the top
+
+// Moved formatter declaration to the top-level
+final formatter = DateFormat.yMd();
 
 // Changed from ConsumerStatefulWidget to StatefulWidget
 class NewExpense extends StatefulWidget {
@@ -24,10 +27,6 @@ class _NewExpenseState extends State<NewExpense> {
   final List<Account> accounts =[];
   late Account _selectedAccount;
 
-  // Access ExpensesController
-  // No need to initialize it here if already put by a parent (e.g. Expenses widget)
-  // It will be used in _submitExpenseData via Get.find()
-
   @override
   void initState() {
     super.initState();
@@ -37,10 +36,9 @@ class _NewExpenseState extends State<NewExpense> {
   }
 
   void populateAccountsDropDownMenu() async{
-    // This local state and DB interaction remains for now
     accounts.addAll(await DbHelper.db.getAllAccounts());
-    if (mounted) { // Check if the widget is still in the tree
-      setState(() {}); // Refresh UI if necessary after accounts are loaded
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -58,17 +56,14 @@ class _NewExpenseState extends State<NewExpense> {
   }
 
   void _submitExpenseData() async {
-    // Find the ExpensesController
     final ExpensesController expensesController = Get.find<ExpensesController>();
-
     final enteredAmount = double.tryParse(_amountController.text);
     final amountIsValid = enteredAmount == null || enteredAmount < 0;
     
-    // Small correction in condition: _selectedAccount.id should be < 0 for "Select Account"
     if (_titleController.text.trim().isEmpty ||
         amountIsValid ||
         _selectedDate == null || 
-        _selectedAccount.id == -1) { // Check if a valid account is selected
+        _selectedAccount.id == -1) {
       showDialog(
           context: context,
           builder: (ctx) {
@@ -88,22 +83,20 @@ class _NewExpenseState extends State<NewExpense> {
       return;
     }
 
-    // These direct DB calls remain for now as they handle different models
     DbHelper.db.addAccountToDatabase(
         Account(name: "HDFC", isLending: 0, balance: 4000));
     DbHelper.db.addTransactionToDatabase(UTransaction(
         merchant: _titleController.text.trim(),
         debit: 1,
-        amount: enteredAmount, // Use the parsed and validated amount
+        amount: enteredAmount,
         date: _selectedDate!,
-        categoryId: 1, // This seems hardcoded, might need review
-        accountId: _selectedAccount.id!, // Use selected account's ID
-        modeOfPayment: "UPI")); // This seems hardcoded
+        categoryId: 1, 
+        accountId: _selectedAccount.id!,
+        modeOfPayment: "UPI"));
 
-    // Use GetX controller to add the Expense
     expensesController.addExpense(Expense(
         title: _titleController.text.trim(),
-        amount: enteredAmount, // Use the parsed and validated amount
+        amount: enteredAmount,
         date: _selectedDate!,
         category: _selectedCategory));
 
@@ -154,7 +147,7 @@ class _NewExpenseState extends State<NewExpense> {
                             controller: _amountController,
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
-                                label: Text("Amount"), prefixText: "\$ "), // Changed prefix to prefixText
+                                label: Text("Amount"), prefixText: "\$ "),
                           ),
                         ),
                       ],
@@ -171,11 +164,11 @@ class _NewExpenseState extends State<NewExpense> {
                   if (width >= 600)
                     Row(
                       children: [
-                        DropdownButton<Category>( // Added type for DropdownButton
+                        DropdownButton<Category>(
                             value: _selectedCategory,
                             items: Category.values
                                 .map(
-                                  (category) => DropdownMenuItem<Category>( // Added type for DropdownMenuItem
+                                  (category) => DropdownMenuItem<Category>(
                                     value: category,
                                     child: Text(
                                       category.name.toUpperCase(),
@@ -190,12 +183,12 @@ class _NewExpenseState extends State<NewExpense> {
                                 });
                               }
                             }),
-                        const SizedBox(width: 16), // Added spacing
-                        DropdownButton<Account>( // Added type for DropdownButton
+                        const SizedBox(width: 16), 
+                        DropdownButton<Account>(
                             value: _selectedAccount,
                             items: accounts
                                 .map(
-                                  (account) => DropdownMenuItem<Account>( // Added type for DropdownMenuItem
+                                  (account) => DropdownMenuItem<Account>(
                                 value: account,
                                 child: Text(
                                   account.name.toUpperCase(),
@@ -218,8 +211,7 @@ class _NewExpenseState extends State<NewExpense> {
                               Text(
                                 _selectedDate == null
                                     ? "No Date is Selected"
-                                    // Ensure 'fomatter' is defined or use DateFormat
-                                    : formatter.format(_selectedDate!), // Assuming formatter is defined (e.g. from intl package)
+                                    : formatter.format(_selectedDate!),
                               ),
                               IconButton(
                                 onPressed: _presentDatePicker,
@@ -238,7 +230,7 @@ class _NewExpenseState extends State<NewExpense> {
                             controller: _amountController,
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
-                                label: Text("Amount"), prefixText: "\$ "), // Changed prefix to prefixText
+                                label: Text("Amount"), prefixText: "\$ "),
                           ),
                         ),
                         const SizedBox(
@@ -252,8 +244,7 @@ class _NewExpenseState extends State<NewExpense> {
                             Text(
                               _selectedDate == null
                                   ? "No Date is Selected"
-                                  // Ensure 'fomatter' is defined or use DateFormat
-                                  : formatter.format(_selectedDate!), // Assuming formatter is defined
+                                  : formatter.format(_selectedDate!),
                             ),
                             IconButton(
                               onPressed: _presentDatePicker,
@@ -266,11 +257,11 @@ class _NewExpenseState extends State<NewExpense> {
                   const SizedBox(
                     height: 16,
                   ),
-                  if (width < 600) // Moved account dropdown here for better layout on smaller screens
+                  if (width < 600)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: DropdownButton<Account>(
-                          isExpanded: true, // Make dropdown wider
+                          isExpanded: true,
                           value: _selectedAccount,
                           items: accounts
                               .map(
@@ -290,7 +281,7 @@ class _NewExpenseState extends State<NewExpense> {
                             }
                           }),
                     ),
-                  if (width < 600) // Moved category dropdown for smaller screens
+                  if (width < 600)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: DropdownButton<Category>(
@@ -314,7 +305,7 @@ class _NewExpenseState extends State<NewExpense> {
                             }
                           }),
                     ),
-                  Row( // Unified button row
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
@@ -337,23 +328,3 @@ class _NewExpenseState extends State<NewExpense> {
     );
   }
 }
-
-// Make sure 'formatter' is defined, e.g., at the top of the file or imported:
-// import 'package:intl/intl.dart';
-// final formatter = DateFormat.yMd();
-// This was missing in the original code for _selectedDate display.
-// For now, I'll assume it's defined elsewhere or will be added.
-// If Category.leisure etc. are enum, their .name access is fine.
-// If Expense model's Category enum is used, ensure it's accessible.
-// The original code had 'fomatter', I corrected to 'formatter'.
-// It seems like there was a typo in the original code.
-// The line: `final List<Account> accounts =[];` inside the state class is fine.
-// The line: `late Account _selectedAccount;` is also fine.
-// The condition for showing dialog: `_selectedAccount!=null || _selectedAccount!.id!>=0`
-// was a bit confusing. Changed to `_selectedAccount.id == -1` (the initial placeholder value)
-// to indicate a valid account hasn't been selected.
-// Corrected TextField prefix: `prefix: Text("\$ ")` to `prefixText: "\$ "` for better practice.
-
-// Added a missing import for the 'formatter', assuming it's from 'intl' package
-import 'package:intl/intl.dart';
-final formatter = DateFormat.yMd();
