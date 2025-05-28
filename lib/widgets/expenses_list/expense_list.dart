@@ -1,75 +1,74 @@
-import 'package:expense_tracker/database/db_helper.dart';
-import 'package:expense_tracker/models/transaction.dart';
+import 'package:expense_tracker/provider/expenses_provider.dart'; // GetX Controller
+import 'package:expense_tracker/models/expense.dart'; // Expense model
 import 'package:expense_tracker/widgets/expenses_list/expense_item.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart'; // GetX import
 
-class ExpenseList extends ConsumerStatefulWidget {
+// Changed from ConsumerStatefulWidget to StatelessWidget
+class ExpenseList extends StatelessWidget {
   const ExpenseList({super.key});
-  @override
-  ConsumerState<ExpenseList> createState() => _ExpenseListState();
-}
-
-class _ExpenseListState extends ConsumerState<ExpenseList> {
-  List<UTransaction> transactions = [];
-
-  Future<List<UTransaction>> fetchTransactions() async {
-    transactions = await DbHelper.db.getAllTransactions();
-    print(transactions.length);
-    print(transactions);
-    return transactions;
-  }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: fetchTransactions(),
-      builder:  (context, snapshot) {
-        if(snapshot.hasData){
-         return ListView.builder(
-            itemBuilder: (ctx, index) => Dismissible(
-              background: Container(
-                color: Theme.of(context).colorScheme.error.withOpacity(0.8),
-                margin: EdgeInsets.symmetric(
-                    horizontal: Theme.of(context).cardTheme.margin!.horizontal),
-              ),
-              onDismissed: (direction) {
-                final expenseToRemove = transactions[index];
-                // ref.read(expensesProvider.notifier).removeExpense(expenseToRemove!.transactionId);
+    // Find the ExpensesController. It should have been put by a parent widget (e.g., Expenses widget).
+    final ExpensesController expensesController = Get.find<ExpensesController>();
 
-                ScaffoldMessenger.of(ctx).clearSnackBars();
-
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  SnackBar(
-                    duration: const Duration(seconds: 3),
-                    content: const Text("Expense Deleted."),
-                    action: SnackBarAction(
-                      label: "Undo",
-                      onPressed: () {
-                        // ref
-                        //     .read(expensesProvider.notifier)
-                        //     .addExpenseAt(index, expenseToRemove);
-                      },
-                    ),
-                  ),
-                );
-              },
-              key: UniqueKey(),
-              child: ExpenseItem(transactions[index]),
-            ),
-            itemCount: transactions.length,
-          );
-        }
-        if(snapshot.connectionState == ConnectionState.waiting){
-          return const Center(
-            child: Text("Fetching Data"),
-          );
-        }
+    // Use Obx to listen to changes in the expenses list from the controller
+    return Obx(() {
+      // If no expenses, show a message
+      if (expensesController.expenses.isEmpty) {
         return const Center(
-          child: Text("No Transactions"),
+          child: Text("No expenses found. Start adding some!"),
         );
-      },
+      }
 
-    );
+      // Otherwise, display the list of expenses
+      return ListView.builder(
+        itemCount: expensesController.expenses.length,
+        itemBuilder: (ctx, index) {
+          final expense = expensesController.expenses[index];
+          return Dismissible(
+            key: ValueKey(expense.id), // Use a unique key for each item
+            background: Container(
+              color: Theme.of(context).colorScheme.error.withOpacity(0.75),
+              margin: EdgeInsets.symmetric(
+                horizontal: Theme.of(context).cardTheme.margin?.horizontal ?? 16.0, // Added null check and default
+              ),
+              child: const Icon(Icons.delete, color: Colors.white, size: 40),
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+            ),
+            direction: DismissDirection.endToStart,
+            onDismissed: (direction) {
+              // Store the expense and its index for potential undo
+              final removedExpense = expense;
+              final removedExpenseIndex = index;
+              
+              // Remove the expense using the controller
+              expensesController.removeExpense(removedExpense.id);
+
+              ScaffoldMessenger.of(ctx).clearSnackBars();
+              ScaffoldMessenger.of(ctx).showSnackBar(
+                SnackBar(
+                  duration: const Duration(seconds: 3),
+                  content: const Text("Expense Deleted."),
+                  action: SnackBarAction(
+                    label: "Undo",
+                    onPressed: () {
+                      // Add the expense back at its original position using the controller
+                      expensesController.addExpenseAt(removedExpenseIndex, removedExpense);
+                    },
+                  ),
+                ),
+              );
+            },
+            // Child is now ExpenseItem, assuming it takes an Expense object
+            // If ExpenseItem was designed for UTransaction, it will also need refactoring.
+            // For now, assuming ExpenseItem can handle an Expense object.
+            child: ExpenseItem(expense), 
+          );
+        },
+      );
+    });
   }
 }

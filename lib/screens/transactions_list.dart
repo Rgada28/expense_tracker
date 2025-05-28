@@ -1,52 +1,77 @@
-import 'package:expense_tracker/models/expense.dart';
+// Removed Riverpod import
+// import 'package:expense_tracker/models/expense.dart'; // This import seems unused here
 import 'package:expense_tracker/models/transaction_demo.dart';
-import 'package:expense_tracker/provider/expenses_provider.dart';
-import 'package:expense_tracker/provider/transactions_provider.dart';
-import 'package:expense_tracker/widgets/expenses_list/expense_item.dart';
+// Removed Riverpod provider import
+import 'package:expense_tracker/provider/transactions_provider.dart'; // GetX Controller
+// import 'package:expense_tracker/widgets/expenses_list/expense_item.dart'; // This was likely for Expense model
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart'; // Added GetX import
 
-class TransactionList extends ConsumerWidget {
-  const TransactionList({super.key, required this.transactions});
-
-  final List<TransactionDemo> transactions;
+// Changed from ConsumerWidget to StatelessWidget
+// Removed 'transactions' parameter from constructor as it will now get data from GetX controller
+class TransactionList extends StatelessWidget {
+  const TransactionList({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ListView.builder(
-      itemBuilder: (ctx, index) => Dismissible(
-        background: Container(
-          color: Theme.of(context).colorScheme.error.withOpacity(0.8),
-          margin: EdgeInsets.symmetric(
-              horizontal: Theme.of(context).cardTheme.margin!.horizontal),
-        ),
-        onDismissed: (direction) {
-          final transactionToRemove = transactions[index];
-          ref
-              .read(transactionsProvider.notifier)
-              .removeExpense(transactionToRemove.transactionId);
+  Widget build(BuildContext context) {
+    // Find the TransactionsController.
+    // It should have been put by a parent widget or higher up in the app.
+    final TransactionsController transactionsController = Get.find<TransactionsController>();
 
-          ScaffoldMessenger.of(ctx).clearSnackBars();
-
-          ScaffoldMessenger.of(ctx).showSnackBar(
-            SnackBar(
-              duration: const Duration(seconds: 3),
-              content: const Text("Expense Deleted."),
-              action: SnackBarAction(
-                label: "Undo",
-                onPressed: () {
-                  ref
-                      .read(transactionsProvider.notifier)
-                      .addExpenseAt(index, transactionToRemove);
-                },
+    // Use Obx to listen to changes in the transactions list from the controller
+    return Obx(() {
+      if (transactionsController.transactions.isEmpty) {
+        return const Center(
+          child: Text("No transactions found. Start adding some!"),
+        );
+      }
+      return ListView.builder(
+        itemCount: transactionsController.transactions.length,
+        itemBuilder: (ctx, index) {
+          final transaction = transactionsController.transactions[index];
+          return Dismissible(
+            key: ValueKey(transaction.transactionId), // Use a unique key
+            background: Container(
+              color: Theme.of(context).colorScheme.error.withOpacity(0.75),
+              margin: EdgeInsets.symmetric(
+                horizontal: Theme.of(context).cardTheme.margin!.horizontal,
               ),
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              child: const Icon(Icons.delete, color: Colors.white, size: 40),
+            ),
+            direction: DismissDirection.endToStart,
+            onDismissed: (direction) {
+              final removedTransaction = transaction;
+              final removedTransactionIndex = index;
+
+              transactionsController.removeExpense(removedTransaction.transactionId); // removeExpense is the method name in controller
+
+              ScaffoldMessenger.of(ctx).clearSnackBars();
+              ScaffoldMessenger.of(ctx).showSnackBar(
+                SnackBar(
+                  duration: const Duration(seconds: 3),
+                  content: const Text("Transaction Deleted."),
+                  action: SnackBarAction(
+                    label: "Undo",
+                    onPressed: () {
+                      transactionsController.addExpenseAt(removedTransactionIndex, removedTransaction); // addExpenseAt is method in controller
+                    },
+                  ),
+                ),
+              );
+            },
+            // Using ListTile as in the original for TransactionDemo.
+            // Consider creating a TransactionItem widget for better structure if needed.
+            child: ListTile(
+              title: Text(transaction.merchant.isNotEmpty ? transaction.merchant : "Transaction"), // Display merchant or a default title
+              subtitle: Text(transaction.description ?? "No description"), // Display description
+              trailing: Text("\$${transaction.amount.toStringAsFixed(2)}"), // Display amount
+              // leading: Icon(Icons.monetization_on), // Example icon
             ),
           );
         },
-        key: UniqueKey(),
-        child: ListTile(trailing: Text("${transactions[index].amount}")),
-      ),
-      itemCount: transactions.length,
-    );
+      );
+    });
   }
 }

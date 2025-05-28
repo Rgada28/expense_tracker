@@ -2,25 +2,30 @@ import 'package:expense_tracker/database/db_helper.dart';
 import 'package:expense_tracker/models/account.dart';
 import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/models/transaction.dart';
-import 'package:expense_tracker/provider/expenses_provider.dart';
+import 'package:expense_tracker/provider/expenses_provider.dart'; // Will be GetX controller
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart'; // Added GetX import
+import 'package:intl/intl.dart'; // Moved import to the top
 
-class NewExpense extends ConsumerStatefulWidget {
+// Moved formatter declaration to the top-level
+final formatter = DateFormat.yMd();
+
+// Changed from ConsumerStatefulWidget to StatefulWidget
+class NewExpense extends StatefulWidget {
   const NewExpense({super.key});
 
   @override
-  ConsumerState<NewExpense> createState() => _NewExpenseState();
+  State<NewExpense> createState() => _NewExpenseState();
 }
 
-class _NewExpenseState extends ConsumerState<NewExpense> {
+// State class remains largely the same for local form state
+class _NewExpenseState extends State<NewExpense> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   DateTime? _selectedDate;
   Category _selectedCategory = Category.leisure;
- final List<Account> accounts =[];
- late Account _selectedAccount;
-
+  final List<Account> accounts =[];
+  late Account _selectedAccount;
 
   @override
   void initState() {
@@ -29,8 +34,12 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
     accounts.add(_selectedAccount);
     populateAccountsDropDownMenu();
   }
+
   void populateAccountsDropDownMenu() async{
     accounts.addAll(await DbHelper.db.getAllAccounts());
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _presentDatePicker() async {
@@ -41,22 +50,27 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
         initialDate: now,
         firstDate: firstDate,
         lastDate: now);
-    setState(() => _selectedDate = pickedDate);
+    if (pickedDate != null) {
+      setState(() => _selectedDate = pickedDate);
+    }
   }
 
   void _submitExpenseData() async {
+    final ExpensesController expensesController = Get.find<ExpensesController>();
     final enteredAmount = double.tryParse(_amountController.text);
     final amountIsValid = enteredAmount == null || enteredAmount < 0;
+    
     if (_titleController.text.trim().isEmpty ||
         amountIsValid ||
-        _selectedDate == null || _selectedAccount!=null || _selectedAccount!.id!>=0) {
+        _selectedDate == null || 
+        _selectedAccount.id == -1) {
       showDialog(
           context: context,
           builder: (ctx) {
             return AlertDialog(
               title: const Text("Invalid Input"),
               content: const Text(
-                  "Please make sure a valid Title, Amount or Date has been entered or an Account has been selected"),
+                  "Please make sure a valid Title, Amount, Date, and Account has been entered/selected."),
               actions: [
                 TextButton(
                     onPressed: () {
@@ -68,6 +82,7 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
           });
       return;
     }
+
     DbHelper.db.addAccountToDatabase(
         Account(name: "HDFC", isLending: 0, balance: 4000));
     DbHelper.db.addTransactionToDatabase(UTransaction(
@@ -75,16 +90,19 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
         debit: 1,
         amount: enteredAmount,
         date: _selectedDate!,
-        categoryId: 1,
-        accountId: 1,
+        categoryId: 1, 
+        accountId: _selectedAccount.id!,
         modeOfPayment: "UPI"));
-    ref.watch(expensesProvider.notifier).addExpense(Expense(
+
+    expensesController.addExpense(Expense(
         title: _titleController.text.trim(),
         amount: enteredAmount,
         date: _selectedDate!,
         category: _selectedCategory));
 
-    Navigator.pop(context);
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -129,7 +147,7 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                             controller: _amountController,
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
-                                label: Text("Amount"), prefix: Text("\$ ")),
+                                label: Text("Amount"), prefixText: "\$ "),
                           ),
                         ),
                       ],
@@ -146,11 +164,11 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                   if (width >= 600)
                     Row(
                       children: [
-                        DropdownButton(
+                        DropdownButton<Category>(
                             value: _selectedCategory,
                             items: Category.values
                                 .map(
-                                  (category) => DropdownMenuItem(
+                                  (category) => DropdownMenuItem<Category>(
                                     value: category,
                                     child: Text(
                                       category.name.toUpperCase(),
@@ -165,6 +183,26 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                                 });
                               }
                             }),
+                        const SizedBox(width: 16), 
+                        DropdownButton<Account>(
+                            value: _selectedAccount,
+                            items: accounts
+                                .map(
+                                  (account) => DropdownMenuItem<Account>(
+                                value: account,
+                                child: Text(
+                                  account.name.toUpperCase(),
+                                ),
+                              ),
+                            )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _selectedAccount = value;
+                                });
+                              }
+                            }),
                         Expanded(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -173,7 +211,7 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                               Text(
                                 _selectedDate == null
                                     ? "No Date is Selected"
-                                    : fomatter.format(_selectedDate!),
+                                    : formatter.format(_selectedDate!),
                               ),
                               IconButton(
                                 onPressed: _presentDatePicker,
@@ -192,7 +230,7 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                             controller: _amountController,
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
-                                label: Text("Amount"), prefix: Text("\$ ")),
+                                label: Text("Amount"), prefixText: "\$ "),
                           ),
                         ),
                         const SizedBox(
@@ -206,7 +244,7 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                             Text(
                               _selectedDate == null
                                   ? "No Date is Selected"
-                                  : fomatter.format(_selectedDate!),
+                                  : formatter.format(_selectedDate!),
                             ),
                             IconButton(
                               onPressed: _presentDatePicker,
@@ -219,79 +257,68 @@ class _NewExpenseState extends ConsumerState<NewExpense> {
                   const SizedBox(
                     height: 16,
                   ),
-                  if (width >= 600)
-                    Row(
-                      children: [
-                        //TODO place accounts drop down here
-                        const Spacer(),
-                        TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text("Cancel")),
-                        ElevatedButton(
-                          onPressed: _submitExpenseData,
-                          child: const Text("Save Expense"),
-                        ),
-                      ],
-                    )
-                  else
-                    Column(
-                      children: [
-                        DropdownButton(
-                            value: _selectedAccount,
-                            items: accounts
-                                .map(
-                                  (account) => DropdownMenuItem(
-                                value: account,
-                                child: Text(
-                                  account.name.toUpperCase(),
-                                ),
+                  if (width < 600)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: DropdownButton<Account>(
+                          isExpanded: true,
+                          value: _selectedAccount,
+                          items: accounts
+                              .map(
+                                (account) => DropdownMenuItem<Account>(
+                              value: account,
+                              child: Text(
+                                account.name.toUpperCase(),
                               ),
-                            )
-                                .toList(),
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() {
-                                  _selectedAccount = value;
-                                });
-                              }
-                            }),
-                        Row(
-                          children: [
-                            DropdownButton(
-                                value: _selectedCategory,
-                                items: Category.values
-                                    .map(
-                                      (category) => DropdownMenuItem(
-                                        value: category,
-                                        child: Text(
-                                          category.name.toUpperCase(),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() {
-                                      _selectedCategory = value;
-                                    });
-                                  }
-                                }),
-                            const Spacer(),
-                            TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text("Cancel")),
-                            ElevatedButton(
-                              onPressed: _submitExpenseData,
-                              child: const Text("Save Expense"),
                             ),
-                          ],
-                        ),
-                      ],
-                    )
+                          )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                _selectedAccount = value;
+                              });
+                            }
+                          }),
+                    ),
+                  if (width < 600)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: DropdownButton<Category>(
+                          isExpanded: true,
+                          value: _selectedCategory,
+                          items: Category.values
+                              .map(
+                                (category) => DropdownMenuItem<Category>(
+                                  value: category,
+                                  child: Text(
+                                    category.name.toUpperCase(),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                _selectedCategory = value;
+                              });
+                            }
+                          }),
+                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Cancel")),
+                      ElevatedButton(
+                        onPressed: _submitExpenseData,
+                        child: const Text("Save Expense"),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
